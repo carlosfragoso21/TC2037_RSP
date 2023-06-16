@@ -1,4 +1,3 @@
-
 #*----------------------------------------------------*
 #*     This program Elixir program will syntax        *
 #*         highlighting your ABAP code                *
@@ -203,7 +202,7 @@ file_cont_end_html =
     conform_html(lv_html_path,lv_name_content)
   end
 
-  defp make_list(lst, add, cores, remainder) do
+  defp make_list(lst, add, cores, remainder) do #Function to create a list listing the files per core or task
     case cores do
       1 ->
         {result, _} = Enum.split(lst, add + remainder)
@@ -214,37 +213,31 @@ file_cont_end_html =
     end
   end
 
-  def parallel_syntax(p_path)do
+  def parallel_syntax(p_path,cores)do # Function to get filenames, call make_list function and create a task.async using list returning from make_list
     p_path = String.replace(p_path,"\\","/")
     lst_files = Path.wildcard(p_path<>"*.txt")
-    cond do
-      length(lst_files) <= System.schedulers_online() ->
-        lst_files
-        |> Enum.map(&Task.async(fn -> main_syntax(&1) end))
-        |> Enum.map(&Task.await(&1, :infinity))
-      true ->
-        make_list(lst_files, div(length(lst_files),System.schedulers_online()), System.schedulers_online(), rem(length(lst_files),System.schedulers_online()))
+    IO.puts(lst_files)
+        make_list(lst_files, div(length(lst_files),cores), cores, rem(length(lst_files),cores))
         |> Enum.map(&Task.async(fn -> do_parallel(&1) end))
         |> Enum.map(&Task.await(&1, :infinity))
-    end
   end
 
   defp do_parallel([]), do: :ok
-  defp do_parallel(lst)do
+  defp do_parallel(lst)do #in order to proccess each component from actual core
     [head | tail] = lst
     main_syntax(head)
     do_parallel(tail)
   end
 
-  def run_sequential([head | _],1), do: main_syntax(head)
-  def run_sequential([head | tail],iteration) do
-    main_syntax(head)
-    run_sequential(tail,iteration-1)
-  end
-  def calc_speedup(p_path)do
+  def run_sequential(p_path) do #iin order to proccess each component from directory in a sequential process
     p_path = String.replace(p_path,"\\","/")
     lst_files = Path.wildcard(p_path<>"*.txt")
-        ((:timer.tc(fn -> H.Syntax.run_sequential(lst_files,length(lst_files)) end) |> elem(0) |> Kernel./(1_000_000))) /
-        (:timer.tc(fn -> H.Syntax.parallel_syntax(p_path) end) |> elem(0) |> Kernel./(1_000_000))
+    IO.puts(lst_files)
+    Enum.map(lst_files, fn element -> main_syntax(element) end)
+  end
+
+  def calc_speedup(p_path,cores)do #speedup calculation = sequential time / parallel time
+        ((:timer.tc(fn -> H.Syntax.run_sequential(p_path) end) |> elem(0) |> Kernel./(1_000_000))) /
+         (:timer.tc(fn -> H.Syntax.parallel_syntax(p_path,cores) end) |> elem(0) |> Kernel./(1_000_000))
   end
 end
