@@ -1,0 +1,26 @@
+DO lv_end_number TIMES.
+  CLEAR lv_counter, lv_divisor, lv_is_prime, lv_output.
+
+  lv_counter = sy-index.
+  IF lv_counter LESS THAN lv_start_number.
+    CONTINUE.
+  ENDIF.
+
+  lv_is_prime = abap_true.
+  DO lv_counter / 2 TIMES.
+    lv_divisor = sy-index + 1.
+    IF lv_counter MOD lv_divisor = 0.
+      lv_is_prime = abap_false.
+      EXIT.
+    ENDIF.
+  ENDDO.
+
+  IF lv_is_prime = abap_true.
+    CONDENSE lv_counter NO-GAPS.
+    CONCATENATE lv_output lv_counter INTO lv_output SEPARATED BY space.
+  ENDIF.
+
+ENDDO.
+
+WRITE lv_start_number, 'and', lv_end_number.
+WRITE lv_output.

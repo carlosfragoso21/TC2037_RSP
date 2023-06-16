@@ -1,0 +1,7 @@
+      LOOP AT i_r4[] INTO wa_ejemplo.
+        IF wa_ejemplo IS NOT INITIAL.
+          APPEND wa_ejemplo TO i_r4_2[].
+          DELETE i_facts WHERE vbeln = wa_ejemplo-car_invc_no.
+          DELETE i_r4 WHERE car_invc_no = wa_ejemplo-car_invc_no.
+        ENDIF.
+      ENDLOOP.

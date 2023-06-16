@@ -1,0 +1,43 @@
+"Programa para validar registros, enviar mail con registros omitidos y enviar archivo R4
+
+IF i_facts IS NOT INITIAL AND i_r4 IS NOT INITIAL  .
+  CLEAR: i_r4_2[].
+  CASE p_down.
+    WHEN 'X'.
+      "omitir registros con falta de información.
+      LOOP AT i_r4[] ASSIGNING FIELD-SYMBOL(<fs_r4>) WHERE pnt_orig_cd IS INITIAL OR dest_cd IS INITIAL OR dest_splc IS INITIAL OR dest_splc IS INITIAL OR inicial IS INITIAL OR numero IS INITIAL OR frt_qty = 0.
+        IF <fs_r4> IS ASSIGNED.
+          APPEND <fs_r4> TO i_r4_2[].
+          DELETE i_facts WHERE vbeln = <fs_r4>-car_invc_no.
+          DELETE i_r4 WHERE car_invc_no = <fs_r4>-car_invc_no.
+        ENDIF.
+      ENDLOOP.
+      IF i_r4_2[] IS NOT INITIAL.
+            PERFORM f_envia_mail. "mail en dado caso que hayan datos incompletos en alguna factura (usa tvarvc para conseguir destinatarios)
+      ENDIF.
+      " Arma Ruta del Archivo R4 Completa
+      CONCATENATE v_rutaarchivo v_archivonombre
+             INTO v_rutanombre.
+      IF v_rutanombre IS NOT INITIAL AND i_facts[] IS NOT INITIAL AND i_r4[] IS NOT INITIAL.
+        PERFORM f_download_file CHANGING v_flag v_rutanombre. " Manda el Archivo R4 Disco
+        PERFORM f_permisos USING v_rutanombre.
+        " Llena Log del Proceso
+        IF v_flag IS INITIAL.
+          PERFORM f_llena_logs CHANGING v_flag.
+          " Arma Ruta del Archivo de Respaldo R4
+          IF v_rutarespaldo IS NOT INITIAL.
+            CONCATENATE v_rutarespaldo s_erdat-low '_' v_archivonombre
+              INTO v_rutanombre.
+            PERFORM f_download_file CHANGING v_flag v_rutanombre. " Guarda un Respaldo del R4
+          ENDIF.
+       ENDIF.
+      ENDIF.
+
+    WHEN ' '.
+      LOOP AT i_r4      INTO w_r4.
+          WRITE: w_r4.
+      ENDLOOP.
+  ENDCASE.
+ELSE.
+  MESSAGE 'Sin información'.
+ENDIF.

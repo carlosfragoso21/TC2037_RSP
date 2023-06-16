@@ -1,0 +1,22 @@
+SELECT * FROM VBAK INTO TABLE lt_vbak.
+
+IF lt_vbak IS NOT INITIAL.
+  SELECT * FROM VBAP INTO TABLE lt_vbap FOR ALL ENTRIES IN lt_vbak
+    WHERE vbeln = lt_vbak-vbeln. "Vincula las dos tablas utilizando el campo vbeln
+
+  IF lt_vbap IS NOT INITIAL.
+    LOOP AT lt_vbak INTO ls_vbak.
+      LOOP AT lt_vbap INTO ls_vbap WHERE vbeln = ls_vbak-vbeln.
+
+        "Aquí puedes acceder a los campos de VBAK y VBAP para realizar las operaciones deseadas
+        "Ejemplo: WRITE ls_vbak-vbeln, ls_vbap-posnr.
+
+      ENDLOOP.
+    ENDLOOP.
+  ELSE.
+    WRITE 'No se encontraron datos en la tabla VBAP para las VBAK seleccionadas.'.
+  ENDIF.
+
+ELSE.
+  WRITE 'No se encontraron datos en la tabla VBAK según las condiciones especificadas.'.
+ENDIF.

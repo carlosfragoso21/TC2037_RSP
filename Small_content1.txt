@@ -1,0 +1,7 @@
+"Programa declaracion de FORM y llamado a función F4_FILENAME
+
+FORM FILENAME. " Conseguir path de excele mediante f4
+  CALL FUNCTION 'F4_FILENAME'
+    IMPORTING
+      file_name = p_link.
+ENDFORM.

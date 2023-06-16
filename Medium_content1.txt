@@ -1,0 +1,13 @@
+"Archivo para testeo simple
+
+SELECT kunrg 
+	FROM vbrk 
+	WHERE vbeln =Variable1.
+DO !este es un error intencional#!#$%&%$ Variable1 = 'xd'.
+
+Variable1 = 2.
+
+2*2. "comentarioxd 1+1 y FROM.
+
+MOVE lw_fulvo-nombre TO lw_fulvo2-nombre.
+ 
