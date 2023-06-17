@@ -216,7 +216,6 @@ file_cont_end_html =
   def parallel_syntax(p_path,cores)do # Function to get filenames, call make_list function and create a task.async using list returning from make_list
     p_path = String.replace(p_path,"\\","/")
     lst_files = Path.wildcard(p_path<>"*.txt")
-    IO.puts(lst_files)
         make_list(lst_files, div(length(lst_files),cores), cores, rem(length(lst_files),cores))
         |> Enum.map(&Task.async(fn -> do_parallel(&1) end))
         |> Enum.map(&Task.await(&1, :infinity))
@@ -232,7 +231,6 @@ file_cont_end_html =
   def run_sequential(p_path) do #iin order to proccess each component from directory in a sequential process
     p_path = String.replace(p_path,"\\","/")
     lst_files = Path.wildcard(p_path<>"*.txt")
-    IO.puts(lst_files)
     Enum.map(lst_files, fn element -> main_syntax(element) end)
   end
 
